@@ -1,0 +1,6 @@
+import { it, expect } from 'vitest'
+import { nextPhase, phaseDelay } from '../src/renderer/animations/reminder'
+it('peeks before walking in and keeps the greeting readable', () => { expect(nextPhase('peeking')).toBe('entering'); expect(phaseDelay('peeking', false)).toBe(1700); expect(nextPhase('entering')).toBe('greeting'); expect(phaseDelay('greeting',false)).toBe(2200); expect(nextPhase('greeting')).toBe('asking'); expect(phaseDelay('asking',false)).toBe(45000) })
+it('both responses wave and hide after exiting', () => { for (const response of ['positive','negative'] as const) expect(nextPhase(response)).toBe('waving'); expect(nextPhase('waving')).toBe('exiting'); expect(nextPhase('exiting')).toBe('hidden') })
+it('an unanswered visit leaves without restarting the greeting', () => { expect(nextPhase('asking')).toBe('waving'); expect(nextPhase('hidden')).toBe('hidden') })
+it('reduced motion preserves reading time while shortening peek and travel', () => { expect(phaseDelay('peeking',true)).toBeLessThan(phaseDelay('peeking',false)!); expect(phaseDelay('entering',true)).toBeLessThan(phaseDelay('entering',false)!); expect(phaseDelay('positive',true)).toBe(phaseDelay('positive',false)) })

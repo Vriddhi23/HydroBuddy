@@ -1,0 +1,7 @@
+node_modules/
+out/
+release/
+.cache/
+.test-data/
+test-results/
+*.log
