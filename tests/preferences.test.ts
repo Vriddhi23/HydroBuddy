@@ -22,5 +22,15 @@ describe('preferences', () => {
     const p = validatePreferences({ ...defaults, buddyName: '  Mini me  ', avatar: { ...defaults.avatar, source: 'custom', frontAsset: id } })
     expect(p.buddyName).toBe('Mini me'); expect(p.avatar.frontAsset).toBe(id)
   })
+  it('validates custom clothing colors', () => {
+    const valid = { ...defaults, avatar: { ...defaults.avatar, shirtColor: '#A1B2C3', pantsColor: '#234567' } }
+    expect(validatePreferences(valid).avatar).toMatchObject({ shirtColor: '#a1b2c3', pantsColor: '#234567' })
+    for (const invalid of [{ shirtColor: 'url(https://example.com)' }, { pantsColor: '#123' }]) expect(() => validatePreferences({ ...defaults, avatar: { ...defaults.avatar, ...invalid } })).toThrow()
+  })
+  it('retires saved face overlays without resetting the character or routine', () => {
+    const current = { ...defaults, reminderInterval: 45, remindersEnabled: false, onboardingCompleted: true, avatar: { ...defaults.avatar, gender: 'male', shirtColor: '#80a98e', pantsColor: '#bc9273' } }
+    const legacy = { ...current, avatar: { ...current.avatar, faceAsset: '678432a1-7803-43f9-98ef-a3ef9dd7a111', faceCrop: { x: .2, y: -.1, zoom: 2 } } }
+    expect(validatePreferences(legacy)).toEqual(current)
+  })
   it('persists across store instances and backs up damaged data', () => { const dir = mkdtempSync(join(tmpdir(),'hydrobuddy-test-')); try { const p = { ...defaults, onboardingCompleted: true, avatar: { ...defaults.avatar, bottleColor: 'green' as const } }; new PreferenceStore(dir).write(p); expect(new PreferenceStore(dir).read()).toEqual(p); expect(JSON.parse(readFileSync(join(dir,'preferences.json'),'utf8'))).toEqual(p); writeFileSync(join(dir,'preferences.json'),'{broken'); expect(new PreferenceStore(dir).read()).toEqual(defaults); expect(readdirSync(dir).some(x => x.includes('.invalid-'))).toBe(true) } finally { rmSync(dir,{recursive:true,force:true}) } })
 })

@@ -3,9 +3,11 @@ import { createRoot } from 'react-dom/client'
 import type { AppState } from '../shared/api'
 import { Settings } from './screens/Settings'
 import { Companion } from './screens/Companion'
+import { ReminderBubble } from './screens/ReminderBubble'
 import './styles.css'
 const companion = window.location.hash === '#/companion'
-document.body.className = companion ? 'companion-body' : 'settings-body'
+const bubble = window.location.hash === '#/bubble'
+document.body.className = companion || bubble ? 'companion-body' : 'settings-body'
 function App() {
   const [state, setState] = useState<AppState | null>(null), [error, setError] = useState('')
   useEffect(() => { const unsubscribe = window.buddy.onState(setState); window.buddy.getState().then(setState).catch(() => setError('HydroBuddy could not load. Please quit from the tray and reopen the app.')); return unsubscribe }, [])
@@ -13,4 +15,4 @@ function App() {
   if (!state) return null
   return companion ? <Companion state={state}/> : <Settings state={state} onState={setState}/>
 }
-createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>)
+createRoot(document.getElementById('root')!).render(<React.StrictMode>{bubble ? <ReminderBubble/> : <App/>}</React.StrictMode>)

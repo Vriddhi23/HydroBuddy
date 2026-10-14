@@ -25,3 +25,8 @@ export function positionCompanion(win: BrowserWindow) {
   const width = Math.min(400, area.width), height = Math.min(470, area.height)
   win.setBounds({ x: area.x + area.width - width, y: area.y + area.height - height, width, height })
 }
+export function positionBubble(win: BrowserWindow, height = win.getBounds().height) {
+  const area = screen.getPrimaryDisplay().workArea
+  const width = Math.min(350, area.width)
+  win.setBounds({ x: area.x + area.width - width - Math.min(26, area.width - width), y: area.y + Math.max(0, area.height - 265 - height), width, height })
+}

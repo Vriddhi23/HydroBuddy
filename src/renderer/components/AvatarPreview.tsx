@@ -24,9 +24,9 @@ export function AvatarPreview({ preferences }: { preferences: Preferences }) {
       <div className="preview-floor" aria-hidden="true"/>
       <div className="preview-walker"><BuddyFigure appearance={preferences.avatar} phase={phase} label={`${preferences.buddyName || 'Buddy'} preview`}/></div>
       <span className="floor-label">your desktop</span>
-      {phase !== 'rest' && <span className="phase-caption" aria-live="polite">{phase === 'entering' ? 'Walking in…' : phase === 'peeking' ? 'Just a little peek…' : phase === 'exiting' ? 'See you in a bit.' : phase === 'positive' ? 'A little celebration.' : 'A moment for water.'}</span>}
+      {phase !== 'rest' && <span className="phase-caption" aria-live="polite">{phase === 'entering' ? 'Walking in…' : phase === 'peeking' ? 'Just a little peek…' : phase === 'retreating' ? 'Be right there…' : phase === 'exiting' ? 'See you in a bit.' : phase === 'positive' ? 'A little celebration.' : 'A moment for water.'}</span>}
     </div>
-    <div className="preview-toolbar"><div><h2>{preferences.buddyName || 'Buddy'}<span> / your water reminder</span></h2><p>Same desk. A little more company.</p></div><button className="preview-play" disabled={phase !== 'rest'} onClick={() => setPhase('peeking')} aria-label="Preview walk">{phase === 'rest' ? <Play size={16} fill="currentColor"/> : <RotateCcw size={16}/>}</button></div>
+    <div className="preview-toolbar"><div><h2>{preferences.buddyName || 'Buddy'}<span> / your water reminder</span></h2><p>Same desk. A little more company.</p></div><button className="preview-play" onClick={() => setPhase(phase === 'rest' ? 'peeking' : 'rest')} aria-label={phase === 'rest' ? 'Preview walk' : 'Stop preview'} title={phase === 'rest' ? 'Preview walk' : 'Stop preview'}>{phase === 'rest' ? <Play size={16} fill="currentColor"/> : <RotateCcw size={16}/>}</button></div>
     <p className="preview-footnote">A little peek. A friendly hello. A moment for water.</p>
   </section>
 }

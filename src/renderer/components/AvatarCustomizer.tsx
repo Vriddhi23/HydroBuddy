@@ -1,8 +1,9 @@
-import { clothingColors, bottleColors, type AvatarAppearance } from '../../shared/preferences'
+import type { AvatarAppearance } from '../../shared/preferences'
+import { ColorField, shirtSwatches, pantsSwatches } from './ColorField'
 export function AvatarCustomizer({ value, onChange }: { value: AvatarAppearance; onChange: (value: AvatarAppearance) => void }) {
   return <div className="customizer">
-    <fieldset><legend>Your character</legend><div className="segmented">{(['female','male'] as const).map(gender => <button key={gender} type="button" aria-label={gender === 'female' ? 'Female' : 'Male'} aria-pressed={value.gender === gender} className={value.gender === gender ? 'selected' : ''} onClick={() => onChange({ ...value, gender })}><span>{gender === 'female' ? '♀' : '♂'}</span> {gender === 'female' ? 'Female' : 'Male'} {value.gender === gender && <small>✓</small>}</button>)}</div></fieldset>
-    <fieldset><legend>Clothing color <span>{value.clothingColor}</span></legend><div className="swatches">{Object.entries(clothingColors).map(([color, hex]) => <button type="button" key={color} title={color} aria-label={`${color} clothing`} aria-pressed={value.clothingColor === color} style={{ background: hex }} onClick={() => onChange({ ...value, clothingColor: color as AvatarAppearance['clothingColor'] })}>{value.clothingColor === color ? '✓' : ''}</button>)}</div></fieldset>
-    <fieldset><legend>Bottle color <span>{value.bottleColor}</span></legend><div className="swatches">{Object.entries(bottleColors).map(([color, hex]) => <button type="button" key={color} title={color} aria-label={`${color} bottle`} aria-pressed={value.bottleColor === color} style={{ background: hex }} onClick={() => onChange({ ...value, bottleColor: color as AvatarAppearance['bottleColor'] })}>{value.bottleColor === color ? '✓' : ''}</button>)}</div></fieldset>
+    <fieldset><legend>Your character</legend><div className="segmented">{(['female','male'] as const).map(gender => <button key={gender} type="button" aria-label={gender === 'female' ? 'Female' : 'Male'} aria-pressed={value.gender === gender} className={value.gender === gender ? 'selected' : ''} onClick={() => onChange({ ...value, gender })}>{gender === 'female' ? 'Female' : 'Male'} {value.gender === gender && <small>✓</small>}</button>)}</div></fieldset>
+    <ColorField label="T-shirt" colors={shirtSwatches} value={value.shirtColor ?? '#ffffff'} onChange={shirtColor => onChange({ ...value, shirtColor })}/>
+    <ColorField label="Jeans" colors={pantsSwatches} value={value.pantsColor ?? '#99c5e5'} onChange={pantsColor => onChange({ ...value, pantsColor })}/>
   </div>
 }

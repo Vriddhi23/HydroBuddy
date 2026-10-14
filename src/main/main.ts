@@ -1,12 +1,12 @@
 import { app, BrowserWindow, ipcMain, powerMonitor, screen, dialog, type IpcMainInvokeEvent, type IpcMainEvent } from 'electron'
 import { PreferenceStore } from './storage'
 import { ReminderManager } from './reminderManager'
-import { makeWindow, loadWindow, positionCompanion } from './windows'
+import { makeWindow, loadWindow, positionCompanion, positionBubble } from './windows'
 import { createTray } from './tray'
 import { validatePreferences } from '../shared/preferences'
-import type { AppState } from '../shared/api'
+import type { AppState, BubbleContent } from '../shared/api'
+import { validateBubble } from '../shared/bubble'
 import { AvatarAssets } from './avatarAssets'
-import { CompanionInteraction } from './companionInteraction'
 import { join } from 'node:path'
 
 // A test profile never touches the person's real preferences or auto-start setting.
@@ -34,11 +34,18 @@ else {
     const startupSupported = app.isPackaged && ['win32', 'darwin'].includes(process.platform)
     if (startupSupported) preferences.launchAtStartup = app.getLoginItemSettings({ path: process.execPath, args: ['--hidden'] }).openAtLogin
     const companion = makeWindow(true)
-    const interaction = new CompanionInteraction(companion, () => screen.getCursorScreenPoint())
+    // The artwork never intercepts clicks. The small speech window always does,
+    // avoiding Windows click-through races when the pointer enters a button.
+    const bubble = makeWindow(true)
+    bubble.setTitle('HydroBuddy reminder')
+    bubble.setIgnoreMouseEvents(false)
+    positionBubble(bubble, 180)
+    let bubbleContent: BubbleContent | null = null
+    const hideBubble = () => { bubbleContent = null; bubble.webContents.send('bubble:changed', null); bubble.hide() }
     settings = makeWindow(false)
     const state = (): AppState => ({ preferences, active: manager.active, nextReminderAt: manager.nextReminderAt, fastMode, startupSupported })
     const broadcast = () => { for (const win of [settings, companion]) if (win && !win.isDestroyed()) win.webContents.send('state:changed', state()) }
-    const manager = new ReminderManager(() => { positionCompanion(companion); companion.setAlwaysOnTop(true, 'floating'); companion.showInactive() }, () => { interaction.setBounds(null); companion.hide() }, broadcast)
+    const manager = new ReminderManager(() => { positionCompanion(companion); companion.setAlwaysOnTop(true, 'floating'); companion.showInactive() }, () => { hideBubble(); companion.hide() }, broadcast)
     const configure = () => manager.configure(preferences.remindersEnabled && preferences.onboardingCompleted, fastMode ? 10000 : preferences.reminderInterval * 60000)
     const showSettings = () => { settings?.show(); settings?.focus() }
     const test = () => { if (!preferences.onboardingCompleted) showSettings(); else manager.start() }
@@ -47,9 +54,9 @@ else {
       catch { dialog.showErrorBox('Could not save your settings', 'Please check that your local preferences folder is writable.') }
     }, quit: () => app.quit() })
     tray.update(preferences.remindersEnabled)
-    const trusted = (event: IpcMainInvokeEvent | IpcMainEvent, role?: 'settings' | 'companion') => {
-      const target = role === 'settings' ? settings : role === 'companion' ? companion : undefined
-      if (event.senderFrame !== event.sender.mainFrame || (target ? event.sender !== target.webContents : ![settings?.webContents, companion.webContents].includes(event.sender))) throw new Error('Untrusted sender')
+    const trusted = (event: IpcMainInvokeEvent | IpcMainEvent, role?: 'settings' | 'companion' | 'bubble') => {
+      const target = role === 'settings' ? settings : role === 'companion' ? companion : role === 'bubble' ? bubble : undefined
+      if (event.senderFrame !== event.sender.mainFrame || (target ? event.sender !== target.webContents : ![settings?.webContents, companion.webContents, bubble.webContents].includes(event.sender))) throw new Error('Untrusted sender')
     }
     ipcMain.handle('state:get', event => { trusted(event); return state() })
     ipcMain.handle('preferences:save', async (event, input: unknown) => {
@@ -74,7 +81,7 @@ else {
       if (importing) return null
       importing = true
       try {
-        const result = await dialog.showOpenDialog(settings!, { title: 'Choose your avatar', buttonLabel: 'Use this avatar', properties: ['openFile'], filters: [{ name: 'Avatar images', extensions: ['png', 'webp'] }] })
+        const result = await dialog.showOpenDialog(settings!, { title: 'Choose your avatar', buttonLabel: 'Use this image', properties: ['openFile'], filters: [{ name: 'Avatar images', extensions: ['png', 'webp', 'jpg', 'jpeg'] }] })
         if (result.canceled || !result.filePaths[0]) return null
         return await avatars.import(result.filePaths[0])
       } finally { importing = false }
@@ -88,20 +95,46 @@ else {
     })
     ipcMain.on('reminder:finished', event => { trusted(event, 'companion'); if (manager.active) manager.finish() })
     ipcMain.on('settings:close', event => { trusted(event, 'settings'); settings?.hide() })
+    ipcMain.handle('bubble:get', event => { trusted(event, 'bubble'); return bubbleContent })
+    ipcMain.on('bubble:show', (event, value: unknown) => {
+      try {
+        trusted(event, 'companion')
+        const content = validateBubble(value)
+        if (!content || !manager.active) { hideBubble(); return }
+        bubbleContent = content
+        bubble.webContents.send('bubble:changed', bubbleContent)
+        positionBubble(bubble); bubble.setAlwaysOnTop(true, 'floating'); bubble.showInactive()
+      } catch { /* Ignore invalid requests from a stale renderer. */ }
+    })
+    ipcMain.on('bubble:answer', (event, action: unknown) => {
+      try {
+        trusted(event, 'bubble')
+        if (!manager.active || !bubbleContent || !['yes','no','dismiss'].includes(String(action))) return
+        if (action !== 'dismiss' && bubbleContent.phase !== 'asking') return
+        companion.webContents.send('bubble:action', action)
+        if (action === 'dismiss') hideBubble()
+      } catch { /* Reject unauthorized actions. */ }
+    })
     ipcMain.on('companion:bounds', (event, value: unknown) => {
-      try { trusted(event, 'companion'); interaction.setBounds(value) }
+      try {
+        trusted(event, 'bubble')
+        const height = (value as { height?: number } | null)?.height
+        if (typeof height === 'number' && Number.isFinite(height) && height >= 60 && height <= 260) positionBubble(bubble, Math.ceil(height))
+      }
       catch { /* Ignore malformed or stale rectangles without interrupting a reminder. */ }
     })
     settings.on('close', event => { if (!quitting) { event.preventDefault(); settings?.hide() } })
     companion.webContents.on('render-process-gone', () => { manager.finish(); void companion.reload() })
-    screen.on('display-metrics-changed', () => positionCompanion(companion))
-    screen.on('display-added', () => positionCompanion(companion))
-    screen.on('display-removed', () => positionCompanion(companion))
+    const reposition = () => { positionCompanion(companion); positionBubble(bubble) }
+    screen.on('display-metrics-changed', reposition)
+    screen.on('display-added', reposition)
+    screen.on('display-removed', reposition)
+    bubble.webContents.on('render-process-gone', () => { manager.finish(); void bubble.reload() })
     powerMonitor.on('suspend', () => { if (manager.active) manager.finish() })
     powerMonitor.on('resume', () => manager.resume())
     app.on('activate', showSettings)
-    app.on('will-quit', () => { interaction.dispose(); manager.dispose(); tray.tray.destroy() })
-    await Promise.all([loadWindow(companion, '/companion'), loadWindow(settings, '/settings')])
+    app.on('will-quit', () => { manager.dispose(); tray.tray.destroy() })
+    await Promise.all([loadWindow(companion, '/companion'), loadWindow(settings, '/settings'), loadWindow(bubble, '/bubble')])
     configure()
     if (!preferences.onboardingCompleted || !process.argv.includes('--hidden')) showSettings()
   }).catch(error => { dialog.showErrorBox('HydroBuddy could not start', String(error)); app.quit() })

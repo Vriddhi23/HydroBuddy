@@ -1,140 +1,99 @@
-# HydroBuddy 1.7 💧
+# HydroBuddy 1.8.1 💧
 
-A small, friendly desktop hydration companion. HydroBuddy lives in your system tray, walks onto your desktop for a gentle water reminder, reacts to your answer, and waves goodbye. Windows first; no browser extension, server, account, analytics, AI service, or internet connection at runtime.
-
-![HydroBuddy onboarding and live character preview](docs/onboarding.png)
+A small desktop hydration companion for Windows. HydroBuddy lives in the system tray, peeks around the right edge, walks onto your desktop, reminds you to drink water, reacts to your answer, and leaves. Everything works locally after installation.
 
 ## Run locally
 
-Use Node.js **22.19+** and npm on Windows 10/11 (64-bit).
+Use Node.js 22.19+ and npm on Windows 10/11 x64.
 
 ```sh
 npm install
 npm run dev
 ```
 
-First launch opens a simple avatar chooser. Pick a character or drop a PNG/WebP onto the popup. **Use my own image** also offers a file picker and **Try the supplied avatar**, which loads the included transparent character with one click. Your choice opens the main editor. Built-in clothing and bottle colors can be changed; imported artwork keeps its original colors. Name your buddy, write a greeting, and press the circular **Preview walk** button to try the motion. **Meet My HydroBuddy** saves your choices, hides settings, and gives you an immediate first visit. Future visits default to **60 minutes after the previous visit finishes**. Open settings again from the droplet in the Windows system tray (it may be in the hidden-icons overflow).
+First launch opens a four-step popup: **Female or Male → T-shirt → Jeans → Preview and Save**. Both clothing steps offer four swatches and a custom color picker. The preview plays the real peek, retreat, walk, greeting, reaction and departure sequence. Save creates your buddy and schedules the first hourly visit. **Test Reminder** starts a visit immediately. **Change avatar** reopens setup later; settings also let you edit colors, name and greeting.
 
-## Your own avatar and the new walk
-
-**Use my own image** opens a local file picker. PNG and WebP are supported, up to 8 MB, 4096 pixels per side and 12 megapixels. Choose a full-body character with a transparent background. The application copies it into its own preferences folder, so moving the original file does not break it. Images are validated, reduced to at most 768 pixels on the longest side, and trimmed only around transparent padding. Opaque backgrounds are kept and flagged in the interface. No image generation, upload, account, or network access is involved.
-
-Every visit now uses one sequence: a half-visible lean around the right edge, a walk into view, your greeting, a question, a reaction, and a wave goodbye. There is no animation-style selector or side-image slot. Existing profile preferences migrate to this sequence.
-
-The supplied character uses eight individually authored complete-body walking poses, including bent-knee passing steps and changes in torso and arm position. Each pose lasts 135 ms; arrival takes 3 seconds and departure 3.2 seconds. The approved peek, real sad face for **Not yet**, wave and happy pose are retained. She faces left while entering from the right, faces you for the reminder, and faces right while leaving. Built-in characters have animated arms and legs. Other uploaded single images use a steady whole-image entrance and cannot invent leg motion or new facial expressions automatically.
-
-To test with the supplied avatar already selected on your own computer:
+Close Settings to keep HydroBuddy in the system tray. Open Settings, test, pause/resume or quit from the tray menu. A visit waits up to 45 seconds for an answer; the cross dismisses it with an exit animation. The next full interval starts after the visit finishes. Production defaults to 60 minutes, with 30/45/60/90-minute choices.
 
 ```sh
-npm run dev:personal
+npm run dev:fast      # Temporary 10-second development timer
+npm run dev:personal  # Select the supplied female avatar in the local profile
 ```
 
-This explicit development mode saves the supplied character into your normal local profile and opens the editor, preserving your reminder settings. Regular `npm run dev` then keeps that selection.
+The personal command explicitly changes the selected avatar in the normal development profile. Fast mode never changes the saved interval and is ignored in packaged builds.
 
-Saved imports and personal text survive restart. Replacing/removing an already-saved asset deletes that old managed copy after saving; the original source image is untouched. Unsaved draft imports can remain in the local avatars folder. If a managed image is manually deleted, the companion falls back to a built-in figure and Settings asks you to import it again. Existing V1 preferences migrate automatically.
+## Make it yours
 
-For a temporary **10-second** timer:
+The female artwork retains the approved eight-frame walking cycle. The male artwork has matching complete-body poses, short hair, a masculine face and body, and the same shared animation sequence. Frames last 135 ms; entrance lasts 3 seconds and departure 3.2 seconds. Shirt and jeans colors apply to walking, peek, idle, sad, wave and celebration poses. Both jeans legs share the selected base color, with the original shading preserved.
 
-```sh
-npm run dev:fast
-```
+The final setup step shows your animated preview and Save. Face upload and face replacement are not available in this version. Existing face overlays are ignored when loading older preferences; character choices, clothing colors and reminder settings are preserved. Previously imported full-body images are preserved and still move as a single image. Choose Change avatar to switch to a built-in animated character.
 
-Fast mode is session-only and is ignored in installed/packaged builds. Your saved 30/45/60/90-minute preference is preserved. **Test Reminder** runs a complete visit immediately, even when reminders are paused. It saves your current settings first.
+Preferences are validated, saved atomically, and restored after restart. No AI service is part of the installed application.
+
+## Start with your computer
+
+Auto-start is **off by default**. In the installed app, enable **Your routine → Be here when I log in**. HydroBuddy then starts quietly in the tray at sign-in. Pause reminders from the tray or Settings, or use Quit to stop the current session. Disable the startup toggle to stop future automatic launches. Development builds disable this control to avoid registering the development Electron executable.
 
 ## Build and package
-
-```sh
-npm run build
-npm run package
-```
-
-The Windows x64 NSIS installer is written to **`release/HydroBuddy-Setup.exe`**. It supports per-user installation, an installation directory picker, a desktop shortcut, and standard Windows uninstall. The unpacked application is `release/win-unpacked/HydroBuddy.exe`. You can also run `npm run package:dir` to build only the unpacked application. Packaging initially downloads Electron and packaging tools; the installed application works offline.
-
-Builds are unsigned. Windows SmartScreen may show a warning. Before public distribution, obtain a code-signing certificate, replace `build.win.signExecutable: false` with your signing configuration, and test installation and removal on a clean Windows machine. Preferences intentionally survive uninstall so reinstalling restores the buddy; remove `%APPDATA%/HydroBuddy` to erase them (development may use `%APPDATA%/hydrobuddy`).
-
-Auto-start is **off by default**. The installed application can enable it explicitly under **Your routine → Be here when I log in**. It starts hidden in the tray. The toggle is disabled in development to avoid registering the development Electron executable.
-
-## Features
-
-- Female and male layered SVG avatars, six clothing colors, five bottle colors, immediate live preview.
-- Shared walking, breathing, waving, celebration, and gentle sad animations with adjustable expressions.
-- Transparent, frameless, compact desktop window; above normal windows and never automatically takes keyboard focus.
-- Empty transparent areas pass mouse input through to the underlying app; speech bubble controls accept clicks.
-- Greeting, Yes / Not yet responses with locally selected messages, a dismiss button, and a 45-second unanswered timeout.
-- A single reminder schedule in Electron's main process; no duplicate visits from repeated test clicks.
-- System tray settings, test, pause/resume, and quit. Closing settings keeps HydroBuddy running.
-- Local validated JSON preferences written via a temporary file and rename; corrupt files are backed up before falling back to defaults.
-- OS reduced-motion preference, screen work-area positioning, display-change handling, and a fresh interval after sleep.
-- Personal studio with editable name/greeting, local avatar imports, drag-and-drop chooser, and a peek-and-walk preview.
-- Original vector avatars and icons. The supplied transparent character illustration is retained at `src/renderer/public/welcome-buddy.png` and can be selected with **Try the supplied avatar**.
-
-## Verification
 
 ```sh
 npm run typecheck
 npm run lint
 npm test
-npm run test:desktop
+npm run build
+npm run package
 ```
 
-After packaging, `node scripts/packaged-smoke.cjs` checks the real executable with isolated preferences, verifies onboarding and the overlay, and confirms that production ignores fast mode and schedules an hour. The local validation results are recorded in [docs/VALIDATION.md](docs/VALIDATION.md).
+The Windows x64 NSIS installer is `release/HydroBuddy-Setup.exe`. It supports per-user installation, choosing the installation directory, a desktop shortcut and Windows uninstall. `release/win-unpacked/HydroBuddy.exe` is the unpacked app. `npm run package:dir` builds only the unpacked application. Packaging initially needs internet to acquire build tools; the installed app is offline.
 
-Unit tests cover persistence, input validation, timer lifecycle, pause, duplicate prevention, watchdog recovery, resume, and animation phase transitions. The desktop integration script launches real Electron windows using Playwright, exercises onboarding/customization, restarts with persisted preferences, tests both responses, dismiss/reduced motion, pause/test, and the real fast timer with settings hidden. It writes screenshots to `test-results/` and uses an isolated `.test-data/` profile. Run it in an interactive Windows session. It does not modify your regular preferences or OS auto-start setting.
+Builds are unsigned and Windows SmartScreen may display a warning. Use code signing before public distribution. Preferences intentionally survive uninstall; development data is normally in `%APPDATA%/hydrobuddy` and installed data in `%APPDATA%/HydroBuddy`.
 
-Manual release checks: verify the tray menu and overflow icon, click through transparent areas over VS Code/Word, keep typing as a reminder enters, change primary display/scaling, suspend/resume, install/uninstall, and opt in/out of auto-start in the installed app. Exclusive fullscreen applications and secure desktop screens are outside V1's overlay scope.
+For public downloads, signing, release checks and update instructions, see [the Windows launch guide](docs/RELEASING.md).
+
+## Verification
+
+```sh
+npm run test:desktop
+node scripts/motion-check.cjs
+node scripts/clothing-review.cjs
+node scripts/walk-art-check.cjs
+node scripts/packaged-smoke.cjs  # after packaging
+```
+
+Desktop tests use isolated `.test-data` profiles and write screenshots to `test-results`. They check the setup flow, color changes, both responses, dismissal, retired face controls, save/restart, dialog controls and pause. Motion checks verify full retreat before the upright walk, all eight frames, direction, reactions and reduced motion. Native Windows cross and Not yet clicks were also checked separately. See [validation notes](docs/VALIDATION.md).
 
 ## Structure
 
 ```text
-src/
-  main/
-    main.ts                 App lifetime, narrow IPC handlers, startup integration
-    windows.ts              Secure windows and display placement
-    reminderManager.ts      Main-process reminder scheduling
-    storage.ts              Validated, atomic local preferences
-    avatarAssets.ts         Local image validation, normalization and managed copies
-    tray.ts                 System tray menu
-  preload/index.ts          Only the typed HydroBuddy API
-  shared/
-    api.ts                  Renderer/main contract
-    preferences.ts          Defaults, palettes and validation
-  renderer/
-    screens/Settings.tsx    Onboarding, live preview, reminders and About
-    screens/Companion.tsx   Reminder interaction state machine
-    components/             Avatar chooser, shared figure, whole-body walking, reactions and preview
-    hooks/                  Cached local avatar loading
-    animations/reminder.ts  Timing, transitions and local messages
-    public/                 Supplied transparent illustration
-    avatar.css              Shared body-part animation system
-    styles.css              Application and companion styles
-resources/                  App and tray icons
-scripts/                    Icon generation and desktop integration verification
-tests/                      Timer, persistence and interaction unit tests
+src/main/                 Electron lifecycle, tray, secure windows, timer and local storage
+src/preload/index.ts      Narrow, typed IPC bridge
+src/shared/               Preferences, validation and IPC contracts
+src/renderer/screens/    Settings, Companion and ReminderBubble
+src/renderer/components/ SetupWizard, ColorField, AvatarPreview,
+                         BuddyFigure, SuppliedAvatar and ProfileWalk
+src/renderer/animations/ Reminder state machine, walking timings and avatarPainter
+src/renderer/public/     Female and male walking/reaction artwork
+resources/               Application and tray icons
+scripts/                 Desktop, native interaction and packaging checks
+tests/                   Input validation, storage, timers and interaction tests
+docs/                    Artwork provenance and validation notes
 ```
 
-Appearance (`AvatarAppearance`), animation (`AnimationState`/`Expression`), and reminder timing are separate. `BuddyFigure` selects the built-in drawing or imported artwork; both use the same reminder phase sequence. AI generation is not included.
+Appearance, pose rendering and reminder timing remain separate. Both characters use the same renderer and state machine. Color tinting happens locally on the registered whole-body pose; limbs are not detached or re-rigged.
 
-## Security and privacy
+The avatar window is transparent, frameless, always-on-top during visits, non-focusable and click-through. A separate compact speech window receives clicks without cursor hit-testing toggles. Closing either response or dismissal flow hides both windows. Display work areas determine placement.
 
-`contextIsolation`, renderer sandboxing and web security are enabled; `nodeIntegration` is disabled. The preload exports only specific actions. Main-process handlers check sender window and top-level frame; settings payloads are validated and reconstructed from allowed fields. Navigation, new windows, and permission requests are denied. A content security policy restricts renderer resources. There are no remote fonts, analytics, tracking, or production network requests in application code.
+## Privacy and security
 
-## Known limitations
+No accounts, cloud, analytics, AI calls or backend. Electron uses context isolation, sandboxing, web security, disabled Node integration and a restrictive content security policy. IPC checks the sender window and main frame, validates colors/text/asset IDs, and never exposes arbitrary file paths to the renderer. Navigation, new windows and permission requests are denied.
 
-- Primary display only. The OS taskbar work area is respected; tiny displays, unusual scaling, and exclusive fullscreen apps need further device testing.
-- The companion deliberately cannot take keyboard focus. Its controls are pointer-operated; settings are keyboard accessible. An optional focused/keyboard-accessible companion mode is a useful next accessibility improvement.
-- Sleep does not accumulate missed visits. Resume begins a fresh full interval. Quitting and restarting also starts a fresh interval.
-- Pausing during a visit hides it immediately. Dismissing normally plays the exit animation.
-- macOS has platform-aware startup support and a packaging target, but its tray behavior, transparency, signing and notarization have not been tested. Build and validate macOS on a Mac before release.
-- No sound, hydration analytics, AI generation, cloud features, or medical recommendations.
-- Arbitrary uploaded flat artwork cannot articulate limbs or change its drawn expression automatically. The supplied character includes a bundled pose atlas; built-in figures use joint animation. Other images have a steady, non-hopping entrance.
-- The build toolchain currently includes moderate upstream audit findings in electron-builder's downloader dependency tree. Production dependencies pass `npm audit --omit=dev`; recheck and update the toolchain before public distribution.
+## Known limitations and next steps
 
-Electron window behavior follows the [Electron BrowserWindow documentation](https://www.electronjs.org/docs/latest/api/browser-window). Installer configuration follows the [electron-builder NSIS documentation](https://www.electron.build/docs/nsis/).
+- Face uploads and face replacement are not included.
+- The companion is pointer-operated to avoid taking keyboard focus. Settings are keyboard accessible; an optional keyboard-focus mode remains a future accessibility improvement.
+- Only the primary display is used. Test mixed DPI, display changes, sleep/resume, typing under the overlay and multiple apps on more Windows devices before distribution. Exclusive fullscreen and secure desktop screens are outside scope.
+- Test install/uninstall and startup opt-in/out on a clean Windows account, then add code signing and Windows CI.
+- macOS has a packaging target and startup integration, but needs testing/signing/notarization on a Mac.
+- Quitting/restarting and waking from sleep begin a new full interval; missed reminders are not accumulated.
 
-## Suggested next steps
-
-Test the installer on a clean Windows account, add a signed release pipeline and Windows CI, test multiple DPI/display combinations, then validate macOS. Consider a keyboard-accessible companion mode before broad release.
-
-The supplied reaction atlas is `src/renderer/public/buddy-motion-atlas.png`, and the walking frames are `src/renderer/public/walk-v2/step-01.png` through `step-08.png`. Its built-in image-generation prompts are recorded in [docs/AVATAR-ART.md](docs/AVATAR-ART.md). No generation service is used by the installed app. `node scripts/motion-check.cjs` verifies the unchanged edge reveal, all eight full-body frames, direction and response expressions.
-
-The latest complete-body frame prompts are in [docs/WALK-FRAMES-V2.md](docs/WALK-FRAMES-V2.md). Reminder buttons use native cursor hit-testing over the speech bubble, including when it appears beneath a stationary pointer.
+Female artwork prompts: [original art](docs/AVATAR-ART.md), [walking frames](docs/WALK-FRAMES-V2.md). Male artwork and full generation prompt set: [male avatar art](docs/MALE-AVATAR-ART.md). All generated assets are bundled locally; image generation was a development step only.

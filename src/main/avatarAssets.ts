@@ -15,7 +15,7 @@ export class AvatarAssets {
     let bytes: Buffer
     try {
       const stat = await file.stat()
-      if (!stat.isFile() || stat.size > 8 * 1024 * 1024) throw new Error('Choose a PNG or WebP smaller than 8 MB.')
+      if (!stat.isFile() || stat.size > 8 * 1024 * 1024) throw new Error('Choose a PNG, JPEG or WebP smaller than 8 MB.')
       bytes = await file.readFile()
     } finally { await file.close() }
     const asset = await this.importBytes(bytes)
@@ -23,10 +23,10 @@ export class AvatarAssets {
     return { ...asset, motionPack }
   }
   async importBytes(bytes: Buffer): Promise<AvatarAsset> {
-    if (!bytes.length || bytes.length > 8 * 1024 * 1024) throw new Error('Choose a PNG or WebP smaller than 8 MB.')
+    if (!bytes.length || bytes.length > 8 * 1024 * 1024) throw new Error('Choose a PNG, JPEG or WebP smaller than 8 MB.')
     let dimensions: ReturnType<typeof imageSize>
-    try { dimensions = imageSize(bytes) } catch { throw new Error('This file is not a readable PNG or WebP image.') }
-    if (!['png', 'webp'].includes(dimensions.type ?? '') || !dimensions.width || !dimensions.height) throw new Error('Please choose a PNG or WebP image.')
+    try { dimensions = imageSize(bytes) } catch { throw new Error('This file is not a readable PNG, JPEG or WebP image.') }
+    if (!['png', 'webp', 'jpg'].includes(dimensions.type ?? '') || !dimensions.width || !dimensions.height) throw new Error('Please choose a PNG, JPEG or WebP image.')
     if (dimensions.width > 4096 || dimensions.height > 4096 || dimensions.width * dimensions.height > 12000000) throw new Error('Choose an image no larger than 4096 pixels per side (12 megapixels).')
     let decoded = nativeImage.createFromBuffer(bytes)
     if (decoded.isEmpty()) throw new Error('This image could not be opened. Try exporting it as a PNG.')
@@ -65,3 +65,4 @@ export class AvatarAssets {
     return false
   }
 }
+
