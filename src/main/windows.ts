@@ -13,7 +13,10 @@ export function makeWindow(companion: boolean) {
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
   win.webContents.on('will-navigate', event => event.preventDefault())
   win.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false))
-  if (companion) { positionCompanion(win); win.setIgnoreMouseEvents(true, { forward: true }) }
+  if (companion) {
+    positionCompanion(win); win.setIgnoreMouseEvents(true, { forward: true })
+    if (process.platform === 'darwin') win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+  }
   return win
 }
 export async function loadWindow(win: BrowserWindow, route: string) {

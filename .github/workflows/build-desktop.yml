@@ -1,0 +1,62 @@
+name: Build desktop installers
+
+# Manual builds produce downloadable test artifacts, never publish a release.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows-x64
+            package: npx electron-builder --win nsis --x64 --publish never
+          - os: macos-15
+            label: Mac-Apple-Silicon
+            package: npx electron-builder --mac dmg --arm64 --publish never
+          - os: macos-15-intel
+            label: Mac-Intel
+            package: npx electron-builder --mac dmg --x64 --publish never
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22.19.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: node scripts/personalization-test.cjs
+      - run: ${{ matrix.package }}
+      - run: node scripts/packaged-smoke.cjs
+      - run: node scripts/release-checksums.cjs
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: HydroBuddy-${{ matrix.label }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            release/HydroBuddy-Setup.exe
+            release/HydroBuddy-*-mac-*.dmg
+            release/SHA256SUMS-*.txt
+      - name: Upload test screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Test-screenshots-${{ matrix.label }}
+          path: test-results/*.png
+          if-no-files-found: ignore

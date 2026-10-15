@@ -1,3 +1,5 @@
+> For version 1.9.0 and Windows + Mac downloads, use [the current desktop release guide](MAC-RELEASE.md). The instructions below describe the earlier Windows-only 1.8.1 beta.
+
 # Launch HydroBuddy for Windows
 
 The deliverable for users is `release/HydroBuddy-Setup.exe`. Users install it, choose a character and colors, and save. They do not need Node.js, npm, a browser extension, an account, or an internet connection to run it. Start with a Windows x64 beta; macOS is not yet verified.

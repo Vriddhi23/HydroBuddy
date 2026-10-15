@@ -1,6 +1,6 @@
 {
   "name": "hydrobuddy",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "private": true,
   "description": "Your little desktop hydration companion",
   "author": "HydroBuddy",
@@ -13,9 +13,11 @@
     "test": "vitest run",
     "test:desktop": "npm run build && node scripts/desktop-test.cjs",
     "build": "npm run typecheck && electron-vite build",
-    "package": "npm run build && electron-builder --win nsis --x64",
+    "package": "npm run package:win",
     "package:dir": "npm run build && electron-builder --dir",
-    "dev:personal": "electron-vite dev -- --demo-avatar"
+    "dev:personal": "electron-vite dev -- --demo-avatar",
+    "package:mac": "npm run build && electron-builder --mac dmg --arm64 --x64 --publish never",
+    "package:win": "npm run build && electron-builder --win nsis --x64 --publish never"
   },
   "dependencies": {
     "image-size": "^2.0.4",
@@ -51,7 +53,8 @@
       "out/**/*",
       "resources/icon.png",
       "resources/icon.ico",
-      "package.json"
+      "package.json",
+      "resources/trayTemplate*.png"
     ],
     "asar": true,
     "win": {
@@ -70,7 +73,12 @@
     "mac": {
       "category": "public.app-category.healthcare-fitness",
       "target": "dmg",
-      "icon": "resources/icon.png"
+      "icon": "resources/icon.icns",
+      "artifactName": "HydroBuddy-${version}-mac-${arch}.${ext}",
+      "minimumSystemVersion": "13.0",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "notarize": false
     }
   }
 }

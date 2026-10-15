@@ -1,10 +1,10 @@
-# HydroBuddy 1.8.1 💧
+# HydroBuddy 1.9.0 💧
 
-A small desktop hydration companion for Windows. HydroBuddy lives in the system tray, peeks around the right edge, walks onto your desktop, reminds you to drink water, reacts to your answer, and leaves. Everything works locally after installation.
+A small desktop hydration companion for Windows, with experimental macOS support. HydroBuddy lives in the system tray, peeks around the right edge, walks onto your desktop, reminds you to drink water, reacts to your answer, and leaves. Everything works locally after installation.
 
 ## Run locally
 
-Use Node.js 22.19+ and npm on Windows 10/11 x64.
+Use Node.js 22.19+ and npm on Windows x64 or macOS 13+ (Apple Silicon or Intel). Mac binaries require a Mac or GitHub macOS runner to build.
 
 ```sh
 npm install
@@ -30,9 +30,11 @@ The final setup step shows your animated preview and Save. Face upload and face 
 
 Preferences are validated, saved atomically, and restored after restart. No AI service is part of the installed application.
 
+Mac builds have a menu-bar droplet, native Edit/Window menus, Command+, for Settings, and Command+Q to quit. Companion windows are configured for all desktop Spaces. Mac startup uses bundle registration and the system login-launch flag.
+
 ## Start with your computer
 
-Auto-start is **off by default**. In the installed app, enable **Your routine → Be here when I log in**. HydroBuddy then starts quietly in the tray at sign-in. Pause reminders from the tray or Settings, or use Quit to stop the current session. Disable the startup toggle to stop future automatic launches. Development builds disable this control to avoid registering the development Electron executable.
+Auto-start is **off by default**. In the installed app, enable **Your routine → Be here when I log in**. HydroBuddy then starts quietly in the tray at sign-in. Pause reminders from the tray or Settings, or use Quit to stop the current session. Disable the startup toggle to stop future automatic launches. Development builds disable this control to avoid registering the development Electron executable. Mac login registration must be tested with a Developer ID signed and notarized build; an ad-hoc beta may be refused by macOS.
 
 ## Build and package
 
@@ -41,14 +43,15 @@ npm run typecheck
 npm run lint
 npm test
 npm run build
-npm run package
+npm run package       # Windows x64
+npm run package:mac   # Run on a Mac: Apple Silicon + Intel DMGs
 ```
 
 The Windows x64 NSIS installer is `release/HydroBuddy-Setup.exe`. It supports per-user installation, choosing the installation directory, a desktop shortcut and Windows uninstall. `release/win-unpacked/HydroBuddy.exe` is the unpacked app. `npm run package:dir` builds only the unpacked application. Packaging initially needs internet to acquire build tools; the installed app is offline.
 
-Builds are unsigned and Windows SmartScreen may display a warning. Use code signing before public distribution. Preferences intentionally survive uninstall; development data is normally in `%APPDATA%/hydrobuddy` and installed data in `%APPDATA%/HydroBuddy`.
+Windows builds are unsigned. Mac builds are ad-hoc signed for testing and are not Apple-notarized. SmartScreen or Gatekeeper may display a warning or block launch. Use publisher signing (and Mac notarization) before wider distribution. Preferences intentionally survive uninstall; development data is normally in `%APPDATA%/hydrobuddy` and installed data in `%APPDATA%/HydroBuddy`.
 
-For public downloads, signing, release checks and update instructions, see [the Windows launch guide](docs/RELEASING.md).
+To build both platforms after pushing code, use **Actions → Build desktop installers → Run workflow**. Download the three artifact archives from the successful run, extract them and attach the installers to one release. This does not publish automatically. See [the Windows + Mac beta guide](docs/MAC-RELEASE.md) and [release notes](docs/RELEASE-NOTES-1.9.0.md).
 
 ## Verification
 
@@ -93,7 +96,7 @@ No accounts, cloud, analytics, AI calls or backend. Electron uses context isolat
 - The companion is pointer-operated to avoid taking keyboard focus. Settings are keyboard accessible; an optional keyboard-focus mode remains a future accessibility improvement.
 - Only the primary display is used. Test mixed DPI, display changes, sleep/resume, typing under the overlay and multiple apps on more Windows devices before distribution. Exclusive fullscreen and secure desktop screens are outside scope.
 - Test install/uninstall and startup opt-in/out on a clean Windows account, then add code signing and Windows CI.
-- macOS has a packaging target and startup integration, but needs testing/signing/notarization on a Mac.
+- Mac builds are experimental and ad-hoc signed, not Developer ID signed or notarized. Gatekeeper and login registration may block them. Mac CI and real-device tests still need to run; successful Windows tests do not establish Mac readiness.
 - Quitting/restarting and waking from sleep begin a new full interval; missed reminders are not accumulated.
 
 Female artwork prompts: [original art](docs/AVATAR-ART.md), [walking frames](docs/WALK-FRAMES-V2.md). Male artwork and full generation prompt set: [male avatar art](docs/MALE-AVATAR-ART.md). All generated assets are bundled locally; image generation was a development step only.

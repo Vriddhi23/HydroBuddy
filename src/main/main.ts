@@ -8,6 +8,8 @@ import type { AppState, BubbleContent } from '../shared/api'
 import { validateBubble } from '../shared/bubble'
 import { AvatarAssets } from './avatarAssets'
 import { join } from 'node:path'
+import { createStartupController } from './startup'
+import { createAppMenu } from './menu'
 
 // A test profile never touches the person's real preferences or auto-start setting.
 if (process.env.HYDROBUDDY_TEST_DATA) app.setPath('userData', process.env.HYDROBUDDY_TEST_DATA)
@@ -20,7 +22,7 @@ else {
   app.on('before-quit', () => { quitting = true })
   app.on('window-all-closed', () => { /* Tray owns the lifetime of this application. */ })
   app.whenReady().then(async () => {
-    app.setAppUserModelId('com.hydrobuddy.desktop')
+    if (process.platform === 'win32') app.setAppUserModelId('com.hydrobuddy.desktop')
     const store = new PreferenceStore(app.getPath('userData'))
     const avatars = new AvatarAssets(app.getPath('userData'))
     let preferences = store.read()
@@ -31,8 +33,10 @@ else {
       preferences = { ...preferences, avatar: { ...preferences.avatar, source: 'custom', frontAsset: asset.id, sideAsset: null }, onboardingCompleted: true }
       store.write(preferences)
     }
-    const startupSupported = app.isPackaged && ['win32', 'darwin'].includes(process.platform)
-    if (startupSupported) preferences.launchAtStartup = app.getLoginItemSettings({ path: process.execPath, args: ['--hidden'] }).openAtLogin
+    const startup = createStartupController(app)
+    const startupSupported = startup.supported
+    const startedHidden = startup.startedHidden(process.argv)
+    if (startupSupported) preferences.launchAtStartup = startup.read()!.openAtLogin
     const companion = makeWindow(true)
     // The artwork never intercepts clicks. The small speech window always does,
     // avoiding Windows click-through races when the pointer enters a button.
@@ -48,6 +52,7 @@ else {
     const manager = new ReminderManager(() => { positionCompanion(companion); companion.setAlwaysOnTop(true, 'floating'); companion.showInactive() }, () => { hideBubble(); companion.hide() }, broadcast)
     const configure = () => manager.configure(preferences.remindersEnabled && preferences.onboardingCompleted, fastMode ? 10000 : preferences.reminderInterval * 60000)
     const showSettings = () => { settings?.show(); settings?.focus() }
+    createAppMenu(showSettings)
     const test = () => { if (!preferences.onboardingCompleted) showSettings(); else manager.start() }
     const tray = createTray({ show: test, settings: showSettings, toggle: () => {
       try { const next = { ...preferences, remindersEnabled: !preferences.remindersEnabled }; store.write(next); preferences = next; configure(); tray.update(next.remindersEnabled) }
@@ -64,9 +69,7 @@ else {
       if (next.avatar.source === 'custom' && !(await avatars.read(next.avatar.frontAsset!))) throw new Error('Your avatar file is missing. Please import it again.')
       if (next.avatar.sideAsset && !(await avatars.read(next.avatar.sideAsset))) throw new Error('Your side-view file is missing. Please import it again or remove the side view.')
       if (next.launchAtStartup !== preferences.launchAtStartup) {
-        if (!startupSupported) throw new Error('Start at login is available after installation.')
-        app.setLoginItemSettings({ openAtLogin: next.launchAtStartup, path: process.execPath, args: ['--hidden'] })
-        next.launchAtStartup = app.getLoginItemSettings({ path: process.execPath, args: ['--hidden'] }).openAtLogin
+        next.launchAtStartup = startup.setEnabled(next.launchAtStartup)
       }
       store.write(next)
       const previousAssets = [preferences.avatar.frontAsset, preferences.avatar.sideAsset]
@@ -136,6 +139,6 @@ else {
     app.on('will-quit', () => { manager.dispose(); tray.tray.destroy() })
     await Promise.all([loadWindow(companion, '/companion'), loadWindow(settings, '/settings'), loadWindow(bubble, '/bubble')])
     configure()
-    if (!preferences.onboardingCompleted || !process.argv.includes('--hidden')) showSettings()
+    if (!preferences.onboardingCompleted || !startedHidden) showSettings()
   }).catch(error => { dialog.showErrorBox('HydroBuddy could not start', String(error)); app.quit() })
 }

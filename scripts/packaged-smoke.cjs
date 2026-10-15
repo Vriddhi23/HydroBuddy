@@ -1,11 +1,17 @@
 const { _electron: electron } = require('playwright')
 const assert = require('node:assert/strict')
 const path = require('node:path')
+const fs = require('node:fs')
 const env = { ...process.env, HYDROBUDDY_TEST_DATA: path.resolve('.test-data', `packaged-${Date.now()}`) }
 delete env.ELECTRON_RUN_AS_NODE
 let app
 async function run() {
-  app = await electron.launch({ executablePath: path.resolve('release/win-unpacked/HydroBuddy.exe'), args: ['--fast-reminders'], env })
+  const candidates = process.platform === 'darwin'
+    ? [process.arch === 'arm64' ? 'release/mac-arm64/HydroBuddy.app/Contents/MacOS/HydroBuddy' : 'release/mac/HydroBuddy.app/Contents/MacOS/HydroBuddy']
+    : ['release/win-unpacked/HydroBuddy.exe']
+  const executablePath = candidates.map(p => path.resolve(p)).find(p => fs.existsSync(p))
+  assert(executablePath, 'Package this platform before running the smoke test')
+  app = await electron.launch({ executablePath, args: ['--fast-reminders'], env })
   let settings
   for (let attempt = 0; attempt < 100; attempt++) {
     settings = app.windows().find(p => p.url().includes('/settings'))
@@ -20,6 +26,8 @@ async function run() {
   assert.equal(state.preferences.reminderInterval, 60)
   assert.equal(state.preferences.onboardingCompleted, false)
   assert.equal(state.startupSupported, true)
+  assert.equal(await app.evaluate(({app}) => app.getVersion()), require('../package.json').version)
+  if (process.platform === 'darwin') assert(await app.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows().filter(w => /\/(companion|bubble)$/.test(w.webContents.getURL())).every(w => w.isVisibleOnAllWorkspaces())))
   await settings.getByRole('button', { name: 'Choose Male', exact: true }).click()
   await settings.getByRole('button', { name: 'Continue', exact: true }).click()
   await settings.getByRole('button', { name: 'Continue', exact: true }).click()
@@ -35,7 +43,7 @@ async function run() {
   await companion.waitForSelector('[data-phase="hidden"]', { state: 'attached' })
   const next = await settings.evaluate(() => window.buddy.getState())
   assert(next.nextReminderAt - Date.now() > 3590000)
-  console.log('PASS: packaged Windows app launches, onboarding and overlay work, startup control is available, fast mode is ignored, and the production timer schedules a full hour.')
+  console.log(`PASS: packaged ${process.platform}/${process.arch} app launches, onboarding and overlay work, startup control is available, fast mode is ignored, and the production timer schedules a full hour.`)
 }
 run().catch(e => { console.error(e); process.exitCode = 1 }).finally(async () => { if (app) await app.close().catch(() => {}) })
 

@@ -1,3 +1,17 @@
+# HydroBuddy 1.9.0 verification · October 15, 2026
+
+- TypeScript, ESLint and production build passed on Windows. All 33 unit tests passed, including platform-specific startup arguments, Mac login-launch detection, rejected registration, required approval, opt-out and development safeguards.
+- Windows Electron integration passed: setup, custom clothing colors, animation preview, save/restart persistence, Yes, Not yet, cross dismissal, dialog controls and pause.
+- Both platform packaging configurations pass electron-builder v26 schema validation. The manually triggered three-platform workflow parses as valid YAML.
+- Mac ICNS header/chunk sizes and all seven PNG resolutions (16–1024 px) validated. Menu-bar icons have transparent 18 px / 36 px representations.
+- Mac runtime, DMG generation, real-device behavior, login after reboot and Apple notarization have NOT been tested on this Windows host. Run the new GitHub Mac jobs, then test on physical Macs. The workflow does not publish releases.
+- The default Mac packages use ad-hoc test signing, not Developer ID signing/notarization. Windows remains unsigned. Electron renderer sandbox, context isolation, Node isolation and web security remain enabled.
+
+- Windows 1.9.0 NSIS installer built successfully (144,128,394 bytes). Packaged smoke test passed: exact application version, onboarding, local male walking assets, overlay, cross dismissal, production hourly timer and ignored development timer flag.
+- SHA-256: c6cc8ecffa2b41a2827fec8e703a2c030ef1851829e824f4971c52baa2975486. Checksums are also in release/SHA256SUMS-win32-x64.txt.
+
+---
+
 # HydroBuddy 1.8.1 verification · October 14, 2026
 
 ## Face-upload removal
