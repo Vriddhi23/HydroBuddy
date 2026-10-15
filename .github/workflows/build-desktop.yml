@@ -40,6 +40,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: node scripts/personalization-test.cjs
+      - run: node scripts/interval-test.cjs
       - run: ${{ matrix.package }}
       - run: node scripts/packaged-smoke.cjs
       - run: node scripts/release-checksums.cjs

@@ -1,3 +1,17 @@
+# HydroBuddy 1.9.1 verification · October 15, 2026
+
+- Added 10/20-minute presets and a custom 1–1,440 whole-minute input. The default remains 60 minutes. Existing saved intervals remain valid.
+- Replaced ambiguous pause copy with explicit On (avatar visits) and Off (visits paused) descriptions. Startup is labeled Start when I log in and explains that paused reminders stay paused.
+- All 47 unit tests passed, including custom interval bounds, invalid IPC inputs and custom preference persistence. ESLint and the production build passed.
+- A real Windows Electron test passed: 10/20-minute schedule deadlines, custom 37-minute save/restart, invalid input blocking, pause/resume and manual Test Reminder while paused. A fresh screenshot was visually inspected.
+- Corrected the countdown so its initial rounded display cannot exceed the selected interval.
+- Mac builds and physical Mac tests remain pending; the GitHub workflow now also runs the custom interval test.
+
+- Windows 1.9.1 installer built successfully (144,127,360 bytes). Packaged launch, setup, artwork, cross dismissal and default hourly scheduling passed. The interval test also passed after correcting the countdown display.
+- SHA-256: 70c59434c1bb2695a77ff32e04c7a18004331b4247776754fb92fb0b2c84d99b. Checksums are in release/SHA256SUMS-win32-x64.txt.
+
+---
+
 # HydroBuddy 1.9.0 verification · October 15, 2026
 
 - TypeScript, ESLint and production build passed on Windows. All 33 unit tests passed, including platform-specific startup arguments, Mac login-launch detection, rejected registration, required approval, opt-out and development safeguards.

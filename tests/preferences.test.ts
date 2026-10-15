@@ -6,6 +6,12 @@ import { defaults, validatePreferences } from '../src/shared/preferences'
 import { PreferenceStore } from '../src/main/storage'
 describe('preferences', () => {
   it('defaults to hourly reminders with auto-start off', () => { expect(defaults.reminderInterval).toBe(60); expect(defaults.launchAtStartup).toBe(false) })
+  it.each([1, 10, 20, 37, 90, 1440])('accepts %i whole minutes', reminderInterval => {
+    expect(validatePreferences({ ...defaults, reminderInterval }).reminderInterval).toBe(reminderInterval)
+  })
+  it.each([0, -1, 1.5, 1441, Infinity, NaN, '20', null])('rejects an invalid interval %s at the IPC boundary', reminderInterval => {
+    expect(() => validatePreferences({ ...defaults, reminderInterval })).toThrow('whole number')
+  })
   it.each([null, {}, { ...defaults, reminderInterval: 0 }, { ...defaults, remindersEnabled: 'yes' }, { ...defaults, avatar: { ...defaults.avatar, clothingColor: '__proto__' } }])('rejects invalid renderer payloads', value => expect(() => validatePreferences(value)).toThrow())
   it('keeps only explicitly allowed fields', () => { expect(validatePreferences({ ...defaults, arbitrary: 'ignored' })).toEqual(defaults) })
   it('migrates V1 without changing the saved colors, interval, or pause state', () => {
@@ -32,5 +38,5 @@ describe('preferences', () => {
     const legacy = { ...current, avatar: { ...current.avatar, faceAsset: '678432a1-7803-43f9-98ef-a3ef9dd7a111', faceCrop: { x: .2, y: -.1, zoom: 2 } } }
     expect(validatePreferences(legacy)).toEqual(current)
   })
-  it('persists across store instances and backs up damaged data', () => { const dir = mkdtempSync(join(tmpdir(),'hydrobuddy-test-')); try { const p = { ...defaults, onboardingCompleted: true, avatar: { ...defaults.avatar, bottleColor: 'green' as const } }; new PreferenceStore(dir).write(p); expect(new PreferenceStore(dir).read()).toEqual(p); expect(JSON.parse(readFileSync(join(dir,'preferences.json'),'utf8'))).toEqual(p); writeFileSync(join(dir,'preferences.json'),'{broken'); expect(new PreferenceStore(dir).read()).toEqual(defaults); expect(readdirSync(dir).some(x => x.includes('.invalid-'))).toBe(true) } finally { rmSync(dir,{recursive:true,force:true}) } })
+  it('persists custom intervals across store instances and backs up damaged data', () => { const dir = mkdtempSync(join(tmpdir(),'hydrobuddy-test-')); try { const p = { ...defaults, reminderInterval: 37, onboardingCompleted: true, avatar: { ...defaults.avatar, bottleColor: 'green' as const } }; new PreferenceStore(dir).write(p); expect(new PreferenceStore(dir).read()).toEqual(p); expect(JSON.parse(readFileSync(join(dir,'preferences.json'),'utf8'))).toEqual(p); writeFileSync(join(dir,'preferences.json'),'{broken'); expect(new PreferenceStore(dir).read()).toEqual(defaults); expect(readdirSync(dir).some(x => x.includes('.invalid-'))).toBe(true) } finally { rmSync(dir,{recursive:true,force:true}) } })
 })

@@ -1,4 +1,4 @@
-# HydroBuddy 1.9.0 💧
+# HydroBuddy 1.9.1 💧
 
 A small desktop hydration companion for Windows, with experimental macOS support. HydroBuddy lives in the system tray, peeks around the right edge, walks onto your desktop, reminds you to drink water, reacts to your answer, and leaves. Everything works locally after installation.
 
@@ -13,7 +13,7 @@ npm run dev
 
 First launch opens a four-step popup: **Female or Male → T-shirt → Jeans → Preview and Save**. Both clothing steps offer four swatches and a custom color picker. The preview plays the real peek, retreat, walk, greeting, reaction and departure sequence. Save creates your buddy and schedules the first hourly visit. **Test Reminder** starts a visit immediately. **Change avatar** reopens setup later; settings also let you edit colors, name and greeting.
 
-Close Settings to keep HydroBuddy in the system tray. Open Settings, test, pause/resume or quit from the tray menu. A visit waits up to 45 seconds for an answer; the cross dismisses it with an exit animation. The next full interval starts after the visit finishes. Production defaults to 60 minutes, with 30/45/60/90-minute choices.
+Close Settings to keep HydroBuddy in the system tray. Open Settings, test, pause/resume or quit from the tray menu. A visit waits up to 45 seconds for an answer; the cross dismisses it with an exit animation. The next full interval starts after the visit finishes. Production defaults to 60 minutes, with 10/20/30/45/60/90-minute presets and any custom whole-minute interval from 1 to 1,440 minutes.
 
 ```sh
 npm run dev:fast      # Temporary 10-second development timer
@@ -32,9 +32,11 @@ Preferences are validated, saved atomically, and restored after restart. No AI s
 
 Mac builds have a menu-bar droplet, native Edit/Window menus, Command+, for Settings, and Command+Q to quit. Companion windows are configured for all desktop Spaces. Mac startup uses bundle registration and the system login-launch flag.
 
+The **Avatar reminders** toggle is on for scheduled avatar visits and off to pause them. It does not control whether the app opens at login. Test Reminder works even while paused. Click Save changes to apply your routine.
+
 ## Start with your computer
 
-Auto-start is **off by default**. In the installed app, enable **Your routine → Be here when I log in**. HydroBuddy then starts quietly in the tray at sign-in. Pause reminders from the tray or Settings, or use Quit to stop the current session. Disable the startup toggle to stop future automatic launches. Development builds disable this control to avoid registering the development Electron executable. Mac login registration must be tested with a Developer ID signed and notarized build; an ad-hoc beta may be refused by macOS.
+Auto-start is **off by default**. In the installed app, enable **Your routine → Start when I log in**. HydroBuddy then starts quietly in the tray at sign-in. Pause reminders from the tray or Settings, or use Quit to stop the current session. Disable the startup toggle to stop future automatic launches. Development builds disable this control to avoid registering the development Electron executable. Mac login registration must be tested with a Developer ID signed and notarized build; an ad-hoc beta may be refused by macOS.
 
 ## Build and package
 
@@ -51,7 +53,7 @@ The Windows x64 NSIS installer is `release/HydroBuddy-Setup.exe`. It supports pe
 
 Windows builds are unsigned. Mac builds are ad-hoc signed for testing and are not Apple-notarized. SmartScreen or Gatekeeper may display a warning or block launch. Use publisher signing (and Mac notarization) before wider distribution. Preferences intentionally survive uninstall; development data is normally in `%APPDATA%/hydrobuddy` and installed data in `%APPDATA%/HydroBuddy`.
 
-To build both platforms after pushing code, use **Actions → Build desktop installers → Run workflow**. Download the three artifact archives from the successful run, extract them and attach the installers to one release. This does not publish automatically. See [the Windows + Mac beta guide](docs/MAC-RELEASE.md) and [release notes](docs/RELEASE-NOTES-1.9.0.md).
+To build both platforms after pushing code, use **Actions → Build desktop installers → Run workflow**. Download the three artifact archives from the successful run, extract them and attach the installers to one release. This does not publish automatically. See [the Windows + Mac beta guide](docs/MAC-RELEASE.md) and [release notes](docs/RELEASE-NOTES-1.9.1.md).
 
 ## Verification
 

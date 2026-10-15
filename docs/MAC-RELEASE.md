@@ -1,4 +1,4 @@
-# Windows and Mac beta release — 1.9.0
+# Windows and Mac beta release — 1.9.1
 
 Use one GitHub release with separate installer assets. A Windows EXE cannot run on a Mac. Apple Silicon and Intel Macs get separate DMGs, built from the same commit and version.
 
@@ -9,12 +9,12 @@ Use one GitHub release with separate installer assets. A Windows EXE cannot run 
 3. Select **Build desktop installers** → **Run workflow**, choose the branch with these changes, and run it.
 4. Wait for **Windows-x64**, **Mac-Apple-Silicon**, and **Mac-Intel** to finish. Each runs lint, unit tests, a production build, the setup/reminder desktop test, packaging, and a packaged-app smoke test. A failed job does not upload an installer. Open its failed step for the error; do not publish an installer from an older run as this version.
 5. Open the completed run. Under **Artifacts**, download all three HydroBuddy archives. Extract them locally. These are build artifacts, not public releases, and expire after 30 days.
-6. The resulting assets are `HydroBuddy-Setup.exe`, `HydroBuddy-1.9.0-mac-arm64.dmg`, `HydroBuddy-1.9.0-mac-x64.dmg`, and three platform-specific `SHA256SUMS-*.txt` files. Upload the extracted files to your release, not the enclosing Actions archives.
-7. Test the downloaded installers on the matching computers. Then create a draft release for tag `v1.9.0` targeting the exact commit used in the successful build. Title: **HydroBuddy 1.9.0 — Desktop Beta**. Attach the installers/checksums, paste [RELEASE-NOTES-1.9.0.md](RELEASE-NOTES-1.9.0.md), mark it as a pre-release, and publish when testing is satisfactory.
+6. The resulting assets are `HydroBuddy-Setup.exe`, `HydroBuddy-1.9.1-mac-arm64.dmg`, `HydroBuddy-1.9.1-mac-x64.dmg`, and three platform-specific `SHA256SUMS-*.txt` files. Upload the extracted files to your release, not the enclosing Actions archives.
+7. Test the downloaded installers on the matching computers. Then create a draft release for tag `v1.9.1` targeting the exact commit used in the successful build. Title: **HydroBuddy 1.9.1 — Desktop Beta**. Attach the installers/checksums, paste [RELEASE-NOTES-1.9.1.md](RELEASE-NOTES-1.9.1.md), mark it as a pre-release, and publish when testing is satisfactory.
 
 The workflow has read-only repository permissions and never publishes a release or pushes code. It uses GitHub's native Mac runners, so it can be started from a Windows computer. GitHub Actions availability and usage limits depend on your repository/account.
 
-Do not attach the old 1.8.1 installer to the 1.9.0 release. If only Windows is ready, publish the Windows beta and clearly state that Mac installers are pending. If immutable releases are enabled, collect all tested assets in a draft before publishing; later binaries may need a new version.
+Do not attach the old 1.8.1 installer to the 1.9.1 release. If only Windows is ready, publish the Windows beta and clearly state that Mac installers are pending. If immutable releases are enabled, collect all tested assets in a draft before publishing; later binaries may need a new version.
 
 ## Test on a Mac
 
@@ -23,7 +23,7 @@ Do not attach the old 1.8.1 installer to the 1.9.0 release. If only Windows is r
 3. The beta is ad-hoc signed, not Developer ID signed or notarized. Gatekeeper may block it. For your own verified test download, follow Apple's current guidance for **System Settings → Privacy & Security → Open Anyway** when available. Do not disable Gatekeeper. A work-managed Mac may require its administrator's approval.
 4. Complete setup, preview the walk, save, and test Yes, Not yet and the cross. Check reminder clicks while typing in another app, desktop Spaces, fullscreen apps, different display scaling and sleep/resume. No Accessibility or Screen Recording permission should be needed.
 5. Close Settings with the red close button; the menu-bar droplet should remain. Open Settings and test/pause/resume from that menu. Confirm **Command+,** opens Settings and **Command+Q** quits. Reopen from Applications and confirm colors and reminder settings persist.
-6. Test **Be here when I log in**, save, log out/in and check the menu-bar icon. Disable it and repeat. macOS login registration may fail for a beta that is not Developer ID signed and notarized; the app now reports failure or a required Login Items approval instead of claiming success. This must be verified with the final signed build before advertising reliable Mac auto-start.
+6. Test **Start when I log in**, save, log out/in and check the menu-bar icon. Disable it and repeat. macOS login registration may fail for a beta that is not Developer ID signed and notarized; the app now reports failure or a required Login Items approval instead of claiming success. This must be verified with the final signed build before advertising reliable Mac auto-start.
 7. Quit HydroBuddy before uninstalling. Move the app from Applications to Trash. Preferences remain in the user's Application Support folder unless separately removed.
 
 Automated Mac tests do not prove Gatekeeper acceptance, a real reboot, fullscreen behavior on physical hardware, or all display configurations. Record those manual results before a wider release.

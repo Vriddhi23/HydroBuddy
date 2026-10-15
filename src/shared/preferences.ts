@@ -1,6 +1,11 @@
 export const clothingColors = { blue: '#639de2', green: '#6ba991', purple: '#9b83cd', pink: '#e994af', orange: '#eaa46c', black: '#414654' } as const
 export const bottleColors = { blue: '#65c3e5', green: '#78c5a6', pink: '#e99cbf', purple: '#ae95df', orange: '#f0b375' } as const
 export const assetIdPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/
+export const reminderIntervalLimits = { min: 1, max: 1440 } as const
+export const reminderIntervalPresets = [10, 20, 30, 45, 60, 90] as const
+export function isValidReminderInterval(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= reminderIntervalLimits.min && value <= reminderIntervalLimits.max
+}
 export type AvatarAppearance = {
   gender: 'male' | 'female'; clothingColor: keyof typeof clothingColors; bottleColor: keyof typeof bottleColors
   source: 'builtin' | 'custom'; frontAsset: string | null; sideAsset: string | null
@@ -34,7 +39,8 @@ function color(value: unknown, fallback: string): string {
 export function validatePreferences(value: unknown): Preferences {
   if (!value || typeof value !== 'object') throw new Error('Invalid preferences')
   const p = value as Preferences
-  if (!p.avatar || !['male', 'female'].includes(p.avatar.gender) || !Object.hasOwn(clothingColors, p.avatar.clothingColor) || !Object.hasOwn(bottleColors, p.avatar.bottleColor) || ![30,45,60,90].includes(p.reminderInterval) || ['remindersEnabled','launchAtStartup','onboardingCompleted'].some(k => typeof p[k as keyof Preferences] !== 'boolean')) throw new Error('Invalid preferences')
+  if (!isValidReminderInterval(p.reminderInterval)) throw new Error('Choose a whole number from 1 to 1,440 minutes.')
+  if (!p.avatar || !['male', 'female'].includes(p.avatar.gender) || !Object.hasOwn(clothingColors, p.avatar.clothingColor) || !Object.hasOwn(bottleColors, p.avatar.bottleColor) || ['remindersEnabled','launchAtStartup','onboardingCompleted'].some(k => typeof p[k as keyof Preferences] !== 'boolean')) throw new Error('Invalid preferences')
   // Additive migration preserves existing V1 preferences.
   const source = p.avatar.source ?? 'builtin', walkStyle = p.walkStyle ?? 'profile'
   if (!['builtin', 'custom'].includes(source) || !['profile', 'classic'].includes(walkStyle)) throw new Error('Invalid avatar options')
