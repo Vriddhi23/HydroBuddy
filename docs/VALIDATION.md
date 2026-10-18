@@ -1,3 +1,14 @@
+# HydroBuddy 1.9.2 verification · October 15, 2026
+
+- Replaced the oversized shared reaction bottle mask with pose-aligned outlines and expanded the shirt coverage to include the celebrating sleeve. Pose registration and walking timing are unchanged.
+- All 55 unit tests passed, including eight new sleeve/torso coverage and bottle-highlight protection cases. TypeScript, ESLint and the production build passed.
+- Visually inspected all four reaction poses for both characters in green, rose and charcoal, plus all eight walking poses for each character. No large white shirt patches remain. Review images are generated locally by `scripts/reaction-colors-review.cjs` and `scripts/clothing-review.cjs`.
+- Mac runtime verification remains pending; the shared renderer fix is included in both platform builds.
+- Windows Electron integration passed: setup, custom colors, save/restart, Yes, Not yet, cross dismissal and pause. The packaged 1.9.2 smoke test passed, including onboarding, overlay and the default hourly timer.
+- Windows installer built successfully (144,127,425 bytes). SHA-256: `692b2dd15b56d8568a882e0f4eb487ae4539bdac8aa40af909547819c17d98d7`.
+
+---
+
 # HydroBuddy 1.9.1 verification · October 15, 2026
 
 - Added 10/20-minute presets and a custom 1–1,440 whole-minute input. The default remains 60 minutes. Existing saved intervals remain valid.

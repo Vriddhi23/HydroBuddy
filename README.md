@@ -1,4 +1,4 @@
-# HydroBuddy 1.9.1 💧
+# HydroBuddy 1.9.2 💧
 
 A small desktop hydration companion for Windows, with experimental macOS support. HydroBuddy lives in the system tray, peeks around the right edge, walks onto your desktop, reminds you to drink water, reacts to your answer, and leaves. Everything works locally after installation.
 
@@ -53,7 +53,7 @@ The Windows x64 NSIS installer is `release/HydroBuddy-Setup.exe`. It supports pe
 
 Windows builds are unsigned. Mac builds are ad-hoc signed for testing and are not Apple-notarized. SmartScreen or Gatekeeper may display a warning or block launch. Use publisher signing (and Mac notarization) before wider distribution. Preferences intentionally survive uninstall; development data is normally in `%APPDATA%/hydrobuddy` and installed data in `%APPDATA%/HydroBuddy`.
 
-To build both platforms after pushing code, use **Actions → Build desktop installers → Run workflow**. Download the three artifact archives from the successful run, extract them and attach the installers to one release. This does not publish automatically. See [the Windows + Mac beta guide](docs/MAC-RELEASE.md) and [release notes](docs/RELEASE-NOTES-1.9.1.md).
+To build both platforms after pushing code, use **Actions → Build desktop installers → Run workflow**. Download the three artifact archives from the successful run, extract them and attach the installers to one release. This does not publish automatically. See [the Windows + Mac beta guide](docs/MAC-RELEASE.md) and [release notes](docs/RELEASE-NOTES-1.9.2.md).
 
 ## Verification
 

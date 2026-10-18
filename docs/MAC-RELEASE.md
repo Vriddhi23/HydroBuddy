@@ -1,4 +1,4 @@
-# Windows and Mac beta release — 1.9.1
+# Windows and Mac beta release — 1.9.2
 
 Use one GitHub release with separate installer assets. A Windows EXE cannot run on a Mac. Apple Silicon and Intel Macs get separate DMGs, built from the same commit and version.
 
@@ -9,12 +9,12 @@ Use one GitHub release with separate installer assets. A Windows EXE cannot run 
 3. Select **Build desktop installers** → **Run workflow**, choose the branch with these changes, and run it.
 4. Wait for **Windows-x64**, **Mac-Apple-Silicon**, and **Mac-Intel** to finish. Each runs lint, unit tests, a production build, the setup/reminder desktop test, packaging, and a packaged-app smoke test. A failed job does not upload an installer. Open its failed step for the error; do not publish an installer from an older run as this version.
 5. Open the completed run. Under **Artifacts**, download all three HydroBuddy archives. Extract them locally. These are build artifacts, not public releases, and expire after 30 days.
-6. The resulting assets are `HydroBuddy-Setup.exe`, `HydroBuddy-1.9.1-mac-arm64.dmg`, `HydroBuddy-1.9.1-mac-x64.dmg`, and three platform-specific `SHA256SUMS-*.txt` files. Upload the extracted files to your release, not the enclosing Actions archives.
-7. Test the downloaded installers on the matching computers. Then create a draft release for tag `v1.9.1` targeting the exact commit used in the successful build. Title: **HydroBuddy 1.9.1 — Desktop Beta**. Attach the installers/checksums, paste [RELEASE-NOTES-1.9.1.md](RELEASE-NOTES-1.9.1.md), mark it as a pre-release, and publish when testing is satisfactory.
+6. The resulting assets are `HydroBuddy-Setup.exe`, `HydroBuddy-1.9.2-mac-arm64.dmg`, `HydroBuddy-1.9.2-mac-x64.dmg`, and three platform-specific `SHA256SUMS-*.txt` files. Upload the extracted files to your release, not the enclosing Actions archives.
+7. Test the downloaded installers on the matching computers. Then create a draft release for tag `v1.9.2` targeting the exact commit used in the successful build. Title: **HydroBuddy 1.9.2 — Desktop Beta**. Attach the installers/checksums, paste [RELEASE-NOTES-1.9.2.md](RELEASE-NOTES-1.9.2.md), mark it as a pre-release, and publish when testing is satisfactory.
 
 The workflow has read-only repository permissions and never publishes a release or pushes code. It uses GitHub's native Mac runners, so it can be started from a Windows computer. GitHub Actions availability and usage limits depend on your repository/account.
 
-Do not attach the old 1.8.1 installer to the 1.9.1 release. If only Windows is ready, publish the Windows beta and clearly state that Mac installers are pending. If immutable releases are enabled, collect all tested assets in a draft before publishing; later binaries may need a new version.
+Do not attach the old 1.8.1 installer to the 1.9.2 release. If only Windows is ready, publish the Windows beta and clearly state that Mac installers are pending. If immutable releases are enabled, collect all tested assets in a draft before publishing; later binaries may need a new version.
 
 ## Test on a Mac
 
