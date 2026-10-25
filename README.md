@@ -1,104 +1,147 @@
-# HydroBuddy 1.9.2 💧
+# HydroBuddy 💧
 
-A small desktop hydration companion for Windows, with experimental macOS support. HydroBuddy lives in the system tray, peeks around the right edge, walks onto your desktop, reminds you to drink water, reacts to your answer, and leaves. Everything works locally after installation.
+A little company at your desk. A gentle reminder to drink water.
+
+HydroBuddy started with a simple idea: what if a water reminder felt like a familiar face stopping by? Your buddy peeks around the edge of the screen, walks over, asks whether you had some water, and heads off again. You can carry on working in the app you already have open.
+
+It's a desktop app built with Electron, React and TypeScript. Once installed, it runs locally. No account, subscription, browser extension or internet connection is needed.
+
+**Current version: 1.9.2 beta.** Windows has been tested locally. macOS builds are configured, but still need testing on real Macs.
+
+[Download a release](https://github.com/Vriddhi23/HydroBuddy/releases) · [Report a problem](https://github.com/Vriddhi23/HydroBuddy/issues) · [Release and Mac testing guide](docs/LAUNCH-GUIDE.md)
+
+## See it in action
+
+![HydroBuddy peeking, walking over Google and celebrating a Yes response](docs/media/hydrobuddy-demo.gif)
+
+[Watch or download the MP4 demo](docs/media/hydrobuddy-linkedin-demo.mp4).
+
+The demo shows the real Windows app over Google in Chrome. The same walking cycle is used in the preview and desktop reminders.
+
+![Four frames from HydroBuddy's walking cycle](docs/media/walking-steps.png)
+
+## Make yourself a buddy
+
+Choose a female or male character, pick a T-shirt color and jeans color, then preview the animation and save. Use a preset swatch or choose your own color. The colors follow your buddy through the walk and reactions.
+
+You can also change your buddy's name and the reminder message. Face upload and AI face replacement aren't part of this release.
+
+![HydroBuddy character and clothing settings](docs/media/choose-your-buddy.png)
+
+## Find a rhythm that works for you
+
+Reminders start at **60 minutes**. Choose 10, 20, 30, 45, 60 or 90 minutes, or enter any whole number from 1 to 1,440 minutes. Click **Save changes** to apply your choice.
+
+![Choosing a 20-minute reminder interval, with a custom minutes field underneath](docs/media/reminder-settings.png)
+
+The two switches do different jobs:
+
+| Setting | What it does |
+| --- | --- |
+| **Avatar reminders** | On: your buddy visits at the selected interval. Off: scheduled visits are paused. |
+| **Start when I log in** | Opens HydroBuddy when you sign in. It doesn't turn paused reminders back on. |
+
+Keep both on if you want automatic reminders after signing in. Startup is off until you enable it. **Test Reminder** works even when scheduled reminders are paused.
+
+During a visit, choose **Yes** for a small celebration, **Not yet** for a gentle response, or use the cross to dismiss. If you leave the question unanswered, your buddy leaves after a short wait. A new full interval starts once the visit finishes.
+
+Closing Settings keeps HydroBuddy running in the system tray on Windows or the menu bar on Mac. Use the droplet menu to reopen Settings, test a reminder, pause visits or quit completely.
+
+## Install
+
+Open the [Releases page](https://github.com/Vriddhi23/HydroBuddy/releases) and expand **Assets** on the release you want. Download the installer for your computer; the automatic “Source code” archives are for developers.
+
+| Computer | Installer |
+| --- | --- |
+| Windows x64 | `HydroBuddy-Setup.exe` |
+| Apple silicon Mac, macOS 13+ | `HydroBuddy-1.9.2-mac-arm64.dmg` |
+| Intel Mac, macOS 13+ | `HydroBuddy-1.9.2-mac-x64.dmg` |
+
+Run the EXE on Windows. On Mac, open the DMG, drag HydroBuddy into Applications, eject the DMG and launch from Applications. Mac files are available only after the corresponding build succeeds and the maintainer attaches them to the release.
+
+This is an early beta. Windows installers are unsigned; Mac builds are ad-hoc signed and not notarized by Apple, so the operating system may warn or block them. See the [Mac test checklist](docs/MAC-TEST-CHECKLIST.md) before sharing a Mac build more widely. Updates are installed manually by downloading a newer release.
 
 ## Run locally
 
-Use Node.js 22.19+ and npm on Windows x64 or macOS 13+ (Apple Silicon or Intel). Mac binaries require a Mac or GitHub macOS runner to build.
+Use Node.js **22.19 or newer** and npm. Clone this repository, open its folder and run:
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
-First launch opens a four-step popup: **Female or Male → T-shirt → Jeans → Preview and Save**. Both clothing steps offer four swatches and a custom color picker. The preview plays the real peek, retreat, walk, greeting, reaction and departure sequence. Save creates your buddy and schedules the first hourly visit. **Test Reminder** starts a visit immediately. **Change avatar** reopens setup later; settings also let you edit colors, name and greeting.
-
-Close Settings to keep HydroBuddy in the system tray. Open Settings, test, pause/resume or quit from the tray menu. A visit waits up to 45 seconds for an answer; the cross dismisses it with an exit animation. The next full interval starts after the visit finishes. Production defaults to 60 minutes, with 10/20/30/45/60/90-minute presets and any custom whole-minute interval from 1 to 1,440 minutes.
+For a temporary ten-second reminder interval during development:
 
 ```sh
-npm run dev:fast      # Temporary 10-second development timer
-npm run dev:personal  # Select the supplied female avatar in the local profile
+npm run dev:fast
 ```
 
-The personal command explicitly changes the selected avatar in the normal development profile. Fast mode never changes the saved interval and is ignored in packaged builds.
+Fast mode doesn't change the saved interval and is ignored in packaged builds. Startup registration is disabled during development so the app doesn't register the development Electron executable as a login item.
 
-## Make it yours
+## How it's built
 
-The female artwork retains the approved eight-frame walking cycle. The male artwork has matching complete-body poses, short hair, a masculine face and body, and the same shared animation sequence. Frames last 135 ms; entrance lasts 3 seconds and departure 3.2 seconds. Shirt and jeans colors apply to walking, peek, idle, sad, wave and celebration poses. Both jeans legs share the selected base color, with the original shading preserved.
+The Electron main process owns the reminder timer, tray menu, windows and local preference file. That keeps the schedule running after Settings closes. React renders the setup screens and companion, with TypeScript shared across both sides.
 
-The final setup step shows your animated preview and Save. Face upload and face replacement are not available in this version. Existing face overlays are ignored when loading older preferences; character choices, clothing colors and reminder settings are preserved. Previously imported full-body images are preserved and still move as a single image. Choose Change avatar to switch to a built-in animated character.
+The companion uses a small transparent, frameless window near the bottom-right of the primary display. Its artwork is click-through. A separate speech-bubble window receives the response buttons, so the avatar can sit over other applications without taking keyboard focus just to appear.
 
-Preferences are validated, saved atomically, and restored after restart. No AI service is part of the installed application.
+Appearance, animation and reminder timing are separate. Both characters use the same sequence:
 
-Mac builds have a menu-bar droplet, native Edit/Window menus, Command+, for Settings, and Command+Q to quit. Companion windows are configured for all desktop Spaces. Mac startup uses bundle registration and the system login-launch flag.
+```text
+peek → retreat → walk in → greeting → question → reaction → wave → walk out
+```
 
-The **Avatar reminders** toggle is on for scheduled avatar visits and off to pause them. It does not control whether the app opens at login. Test Reminder works even while paused. Click Save changes to apply your routine.
+Walking uses eight complete-body image frames. The app registers each pose to a common position and applies clothing colors locally while preserving the shading. Reaction poses have their own clothing and bottle masks. CSS handles movement across the screen, and reduced-motion preferences shorten the movement where supported.
 
-## Start with your computer
+Preferences are validated and saved to a local JSON file using an atomic write. The renderer talks to the main process through a narrow preload API. Context isolation and sandboxing are enabled, Node integration is disabled, and IPC inputs and senders are checked.
 
-Auto-start is **off by default**. In the installed app, enable **Your routine → Start when I log in**. HydroBuddy then starts quietly in the tray at sign-in. Pause reminders from the tray or Settings, or use Quit to stop the current session. Disable the startup toggle to stop future automatic launches. Development builds disable this control to avoid registering the development Electron executable. Mac login registration must be tested with a Developer ID signed and notarized build; an ad-hoc beta may be refused by macOS.
+```text
+src/main/                 App lifecycle, windows, tray, timer and local storage
+src/preload/              Typed bridge between Electron and React
+src/shared/               Preferences, validation and IPC contracts
+src/renderer/screens/     Settings and desktop reminder screens
+src/renderer/components/  Setup, previews and reusable avatar components
+src/renderer/animations/  Reminder phases, walking and clothing colors
+src/renderer/public/      Bundled avatar artwork
+resources/                App and tray icons
+tests/                    Unit tests
+scripts/                  Desktop checks, packaging checks and media capture
+docs/                     Release guides, testing notes and screenshots
+```
 
-## Build and package
+## Check, build and package
 
 ```sh
 npm run typecheck
 npm run lint
 npm test
 npm run build
-npm run package       # Windows x64
-npm run package:mac   # Run on a Mac: Apple Silicon + Intel DMGs
+npm run test:desktop
 ```
 
-The Windows x64 NSIS installer is `release/HydroBuddy-Setup.exe`. It supports per-user installation, choosing the installation directory, a desktop shortcut and Windows uninstall. `release/win-unpacked/HydroBuddy.exe` is the unpacked app. `npm run package:dir` builds only the unpacked application. Packaging initially needs internet to acquire build tools; the installed app is offline.
-
-Windows builds are unsigned. Mac builds are ad-hoc signed for testing and are not Apple-notarized. SmartScreen or Gatekeeper may display a warning or block launch. Use publisher signing (and Mac notarization) before wider distribution. Preferences intentionally survive uninstall; development data is normally in `%APPDATA%/hydrobuddy` and installed data in `%APPDATA%/HydroBuddy`.
-
-To build both platforms after pushing code, use **Actions → Build desktop installers → Run workflow**. Download the three artifact archives from the successful run, extract them and attach the installers to one release. This does not publish automatically. See [the Windows + Mac beta guide](docs/MAC-RELEASE.md) and [release notes](docs/RELEASE-NOTES-1.9.2.md).
-
-## Verification
+Build the Windows installer on Windows:
 
 ```sh
-npm run test:desktop
-node scripts/motion-check.cjs
-node scripts/clothing-review.cjs
-node scripts/walk-art-check.cjs
-node scripts/packaged-smoke.cjs  # after packaging
+npm run package:win
 ```
 
-Desktop tests use isolated `.test-data` profiles and write screenshots to `test-results`. They check the setup flow, color changes, both responses, dismissal, retired face controls, save/restart, dialog controls and pause. Motion checks verify full retreat before the upright walk, all eight frames, direction, reactions and reduced motion. Native Windows cross and Not yet clicks were also checked separately. See [validation notes](docs/VALIDATION.md).
+Build Apple silicon and Intel DMGs on a Mac:
 
-## Structure
-
-```text
-src/main/                 Electron lifecycle, tray, secure windows, timer and local storage
-src/preload/index.ts      Narrow, typed IPC bridge
-src/shared/               Preferences, validation and IPC contracts
-src/renderer/screens/    Settings, Companion and ReminderBubble
-src/renderer/components/ SetupWizard, ColorField, AvatarPreview,
-                         BuddyFigure, SuppliedAvatar and ProfileWalk
-src/renderer/animations/ Reminder state machine, walking timings and avatarPainter
-src/renderer/public/     Female and male walking/reaction artwork
-resources/               Application and tray icons
-scripts/                 Desktop, native interaction and packaging checks
-tests/                   Input validation, storage, timers and interaction tests
-docs/                    Artwork provenance and validation notes
+```sh
+npm run package:mac
 ```
 
-Appearance, pose rendering and reminder timing remain separate. Both characters use the same renderer and state machine. Color tinting happens locally on the registered whole-body pose; limbs are not detached or re-rigged.
+Installers are written to `release/`. After packaging, `node scripts/packaged-smoke.cjs` checks the packaged app for the host's architecture. The manually triggered **Build desktop installers** GitHub Actions workflow builds all three platforms. It uploads build artifacts and never publishes a release automatically.
 
-The avatar window is transparent, frameless, always-on-top during visits, non-focusable and click-through. A separate compact speech window receives clicks without cursor hit-testing toggles. Closing either response or dismissal flow hides both windows. Display work areas determine placement.
+## Privacy
 
-## Privacy and security
+HydroBuddy doesn't use a backend, accounts, analytics, cloud sync or AI APIs. Preferences stay on your computer. Artwork is bundled with the app; image generation was used during development, not while you use HydroBuddy. Artwork notes: [female avatar](docs/AVATAR-ART.md), [walking poses](docs/WALK-FRAMES-V2.md), [male avatar](docs/MALE-AVATAR-ART.md).
 
-No accounts, cloud, analytics, AI calls or backend. Electron uses context isolation, sandboxing, web security, disabled Node integration and a restrictive content security policy. IPC checks the sender window and main frame, validates colors/text/asset IDs, and never exposes arbitrary file paths to the renderer. Navigation, new windows and permission requests are denied.
+## What's still being tested
 
-## Known limitations and next steps
+- Mac installation, Gatekeeper behavior, login startup and desktop Spaces need real-device testing. A successful build alone doesn't prove those work.
+- Placement currently uses the primary display. Mixed display scaling, monitor changes, sleep and fullscreen applications need broader testing.
+- The companion is pointer-operated to avoid taking keyboard focus. Settings support keyboard navigation; a companion keyboard mode remains future work.
+- Waking from sleep or restarting the app starts a fresh interval. Missed visits aren't queued up.
+- Automatic updates, face replacement, cloud features and water-intake analytics aren't included.
 
-- Face uploads and face replacement are not included.
-- The companion is pointer-operated to avoid taking keyboard focus. Settings are keyboard accessible; an optional keyboard-focus mode remains a future accessibility improvement.
-- Only the primary display is used. Test mixed DPI, display changes, sleep/resume, typing under the overlay and multiple apps on more Windows devices before distribution. Exclusive fullscreen and secure desktop screens are outside scope.
-- Test install/uninstall and startup opt-in/out on a clean Windows account, then add code signing and Windows CI.
-- Mac builds are experimental and ad-hoc signed, not Developer ID signed or notarized. Gatekeeper and login registration may block them. Mac CI and real-device tests still need to run; successful Windows tests do not establish Mac readiness.
-- Quitting/restarting and waking from sleep begin a new full interval; missed reminders are not accumulated.
-
-Female artwork prompts: [original art](docs/AVATAR-ART.md), [walking frames](docs/WALK-FRAMES-V2.md). Male artwork and full generation prompt set: [male avatar art](docs/MALE-AVATAR-ART.md). All generated assets are bundled locally; image generation was a development step only.
+If something feels off, [open an issue](https://github.com/Vriddhi23/HydroBuddy/issues) with your operating system, display scaling, the steps to reproduce it, and a screenshot or short recording. Small details matter for a companion that shares your desktop.
