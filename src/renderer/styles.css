@@ -53,3 +53,5 @@
 @media(max-height:760px){.setup-wizard{padding:23px}.gender-portrait{height:220px;width:152px}.outfit-portrait{height:265px;width:183px}.wizard-review-grid{min-height:360px}.wizard-review-grid .preview-scene{min-height:265px}.wizard-heading h1{font-size:27px}}
 
 .custom-interval-label{display:block;font-size:11px;font-weight:600;margin:18px 0 9px}.custom-interval-input{display:flex;align-items:center;gap:10px}.custom-interval-input input{width:112px;padding:11px 12px;border:1px solid #b8cabb;border-radius:8px;background:#fffefa;color:#314b49;font:inherit;font-size:16px}.custom-interval-input input[aria-invalid="true"]{border-color:#a75f4e}.custom-interval-input span{font-size:12px;color:#657a69}.interval-help{font-size:11px;line-height:1.6;color:#78897e;margin-top:8px}.interval-help.invalid{color:#9b4936}
+
+.footer-status .maker-credit{color:#627869;font-size:10px;line-height:1.35;flex-wrap:wrap;gap:3px}.credit-heart{color:#af706c}.footer-status{min-width:0}.footer-actions{flex-shrink:0}
