@@ -12,7 +12,7 @@ export function makeWindow(companion: boolean) {
   })
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
   win.webContents.on('will-navigate', event => event.preventDefault())
-  win.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false))
+  win.webContents.on('will-attach-webview', event => event.preventDefault())
   if (companion) {
     positionCompanion(win); win.setIgnoreMouseEvents(true, { forward: true })
     if (process.platform === 'darwin') win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, powerMonitor, screen, dialog, type IpcMainInvokeEvent, type IpcMainEvent } from 'electron'
+import { app, BrowserWindow, ipcMain, powerMonitor, screen, dialog, session, type IpcMainInvokeEvent, type IpcMainEvent } from 'electron'
 import { PreferenceStore } from './storage'
 import { ReminderManager } from './reminderManager'
 import { makeWindow, loadWindow, positionCompanion, positionBubble } from './windows'
@@ -10,6 +10,7 @@ import { AvatarAssets } from './avatarAssets'
 import { join } from 'node:path'
 import { createStartupController } from './startup'
 import { createAppMenu } from './menu'
+import { configurePrivacy } from './privacy'
 
 // A test profile never touches the person's real preferences or auto-start setting.
 if (process.env.HYDROBUDDY_TEST_DATA) app.setPath('userData', process.env.HYDROBUDDY_TEST_DATA)
@@ -22,6 +23,7 @@ else {
   app.on('before-quit', () => { quitting = true })
   app.on('window-all-closed', () => { /* Tray owns the lifetime of this application. */ })
   app.whenReady().then(async () => {
+    configurePrivacy(session.defaultSession, !app.isPackaged ? process.env.ELECTRON_RENDERER_URL : undefined)
     if (process.platform === 'win32') app.setAppUserModelId('com.hydrobuddy.desktop')
     const store = new PreferenceStore(app.getPath('userData'))
     const avatars = new AvatarAssets(app.getPath('userData'))

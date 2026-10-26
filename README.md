@@ -115,6 +115,7 @@ npm run typecheck
 npm run lint
 npm test
 npm run build
+node scripts/privacy-check.cjs
 npm run test:desktop
 ```
 
@@ -135,6 +136,8 @@ Installers are written to `release/`. After packaging, `node scripts/packaged-sm
 ## Privacy
 
 HydroBuddy doesn't use a backend, accounts, analytics, cloud sync or AI APIs. Preferences stay on your computer. Artwork is bundled with the app; image generation was used during development, not while you use HydroBuddy. Artwork notes: [female avatar](docs/AVATAR-ART.md), [walking poses](docs/WALK-FRAMES-V2.md), [male avatar](docs/MALE-AVATAR-ART.md).
+
+The next build also blocks network requests through the app's Electron session, including localhost, and denies browser permissions and downloads. Development mode permits only its configured local development server. Settings are ordinary local files, not encrypted storage. Existing downloads do not gain these protections until rebuilt. See the [security review](docs/SECURITY-REVIEW-2026-10-25.md) for checks and limits, and the [Apple distribution guide](docs/APPLE-NOTARIZATION.md) for signing and notarization.
 
 ## What's still being tested
 

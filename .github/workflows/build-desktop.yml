@@ -39,6 +39,7 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - run: node scripts/privacy-check.cjs
       - run: node scripts/personalization-test.cjs
       - run: node scripts/interval-test.cjs
       - run: ${{ matrix.package }}
